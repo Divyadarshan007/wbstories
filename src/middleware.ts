@@ -13,7 +13,11 @@ export default async function middleware(request: NextRequest) {
 
   // On the public host in production, the admin tree must never be reachable
   // by guessing the path directly — only via the admin subdomain.
-  if (!isAdminHost && isProd && (isAdminPagePath || isApiAdminPath)) {
+  // TEMPORARY: disabled until a custom domain is attached (no admin.*
+  // subdomain is possible on the shared *.vercel.app domain). /admin/* is
+  // reachable by path for now; verifyAdminSession below still fully gates it.
+  const hostGateEnabled = false;
+  if (hostGateEnabled && !isAdminHost && isProd && (isAdminPagePath || isApiAdminPath)) {
     return NextResponse.rewrite(new URL("/not-found", request.url));
   }
 
