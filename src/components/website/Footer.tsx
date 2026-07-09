@@ -17,6 +17,17 @@ export function Footer() {
             </Link>
           ))}
         </nav>
+        <p>
+          Powered by{" "}
+          <Link
+            href={siteConfig.builtBy.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium hover:text-foreground"
+          >
+            {siteConfig.builtBy.name}
+          </Link>
+        </p>
       </div>
     </footer>
   );

@@ -8,13 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createStorySchema, type CreateStoryInput } from "@/validations/story.validation";
 
@@ -38,17 +31,25 @@ const EMPTY_DEFAULTS: CreateStoryInput = {
 export function StoryForm({ mode, storyId, defaultValues }: StoryFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<CreateStoryInput["status"] | null>(null);
   const initialContent = defaultValues?.content ?? "";
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<z.input<typeof createStorySchema>, unknown, z.output<typeof createStorySchema>>({
     resolver: zodResolver(createStorySchema),
     defaultValues: defaultValues ?? EMPTY_DEFAULTS,
   });
+
+  function submitAs(status: CreateStoryInput["status"]) {
+    setValue("status", status);
+    setPendingStatus(status);
+    void handleSubmit(onSubmit)();
+  }
 
   // `status` has a zod .default(), so react-hook-form tracks it as optional
   // while being edited but the resolver guarantees it's filled in by the
@@ -77,35 +78,31 @@ export function StoryForm({ mode, storyId, defaultValues }: StoryFormProps) {
       toast.error(error instanceof Error ? error.message : "Failed to save story");
     } finally {
       setIsSubmitting(false);
+      setPendingStatus(null);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-3xl">
-      <div className="flex items-center justify-between border-b pb-4">
-        <Controller
-          name="status"
-          control={control}
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        />
-        <div className="flex gap-3">
-          <Button type="button" variant="outline" onClick={() => router.push("/admin/stories")}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : mode === "create" ? "Publish" : "Save changes"}
-          </Button>
-        </div>
+    <form onSubmit={(e) => e.preventDefault()} className="mx-auto max-w-3xl">
+      <div className="flex items-center justify-end gap-3 border-b pb-4">
+        <Button type="button" variant="outline" onClick={() => router.push("/admin/stories")}>
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isSubmitting}
+          onClick={() => submitAs("draft")}
+        >
+          {isSubmitting && pendingStatus === "draft" ? "Saving..." : "Save as Draft"}
+        </Button>
+        <Button
+          type="button"
+          disabled={isSubmitting}
+          onClick={() => submitAs("published")}
+        >
+          {isSubmitting && pendingStatus === "published" ? "Saving..." : "Save as Published"}
+        </Button>
       </div>
 
       {/* Left padding gives CKEditor's block "+" button room to sit inside

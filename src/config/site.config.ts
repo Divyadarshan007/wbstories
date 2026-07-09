@@ -9,6 +9,10 @@ export const siteConfig = {
   description: "Insights, updates, and stories from the world of business.",
   url: env.NEXT_PUBLIC_SITE_URL,
   ogImage: "/images/og-default.png",
+  builtBy: {
+    name: "Zaploom Technologies",
+    url: "https://zaploom.in/",
+  },
   nav: [
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },

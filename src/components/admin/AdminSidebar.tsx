@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, FileText, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/config/site.config";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -14,9 +15,9 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-60 shrink-0 border-r bg-muted/30 md:block">
+    <aside className="hidden w-60 shrink-0 flex-col border-r bg-muted/30 md:flex">
       <div className="flex h-14 items-center border-b px-4 font-semibold">WB Stories Admin</div>
-      <nav className="space-y-1 p-3">
+      <nav className="flex-1 space-y-1 p-3">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const isActive = href === "/admin" ? pathname === href : pathname.startsWith(href);
           return (
@@ -41,6 +42,17 @@ export function AdminSidebar() {
           <span className="ml-auto text-xs">Soon</span>
         </div>
       </nav>
+      <div className="border-t p-3 text-center text-xs text-muted-foreground">
+        Powered by{" "}
+        <Link
+          href={siteConfig.builtBy.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium hover:text-foreground"
+        >
+          {siteConfig.builtBy.name}
+        </Link>
+      </div>
     </aside>
   );
 }
