@@ -130,13 +130,15 @@ export function StoryTable() {
                 <TableRow key={story.id}>
                   <TableCell>
                     <div className="relative size-12 overflow-hidden rounded-md bg-muted">
-                      <Image
-                        src={story.bannerImage.url}
-                        alt={story.title}
-                        fill
-                        sizes="48px"
-                        className="object-cover"
-                      />
+                      {story.bannerImage && (
+                        <Image
+                          src={story.bannerImage.url}
+                          alt={story.title}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                        />
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="max-w-xs truncate font-medium">{story.title}</TableCell>

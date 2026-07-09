@@ -2,6 +2,7 @@ import { StoryRepository } from "@/repositories/story.repository";
 import { generateUniqueSlug } from "@/services/slug.service";
 import { sanitizeHtml } from "@/services/sanitize.service";
 import { calculateReadingTime } from "@/services/reading-time.service";
+import { firstImageUrl, firstVideoEmbedHtml } from "@/helpers/text.helper";
 import { ApiError } from "@/helpers/api-error";
 import { buildStorySearchFilter } from "@/helpers/search-query.helper";
 import { buildSortStage, type SortOrder } from "@/helpers/sort-query.helper";
@@ -21,8 +22,8 @@ function toStoryDTO(doc: LeanStory): StoryDTO {
     id: doc._id.toString(),
     title: doc.title,
     slug: doc.slug,
-    excerpt: doc.excerpt,
     bannerImage: doc.bannerImage,
+    bannerVideo: doc.bannerVideo,
     content: doc.content,
     status: doc.status,
     publishedAt: doc.publishedAt ? toISODate(doc.publishedAt) : null,
@@ -37,8 +38,8 @@ function toStorySummaryDTO(doc: LeanStorySummary): StorySummaryDTO {
     id: doc._id.toString(),
     title: doc.title,
     slug: doc.slug,
-    excerpt: doc.excerpt,
     bannerImage: doc.bannerImage,
+    bannerVideo: doc.bannerVideo,
     status: doc.status,
     publishedAt: doc.publishedAt ? toISODate(doc.publishedAt) : null,
     readingTime: doc.readingTime,
@@ -73,11 +74,13 @@ export const StoryService = {
     const content = sanitizeHtml(input.content);
     const readingTime = calculateReadingTime(content);
     const publishedAt = input.status === "published" ? new Date() : null;
+    const imageUrl = firstImageUrl(content);
+    const videoEmbedHtml = firstVideoEmbedHtml(content);
 
     const created = await StoryRepository.create({
       title: input.title,
-      excerpt: input.excerpt,
-      bannerImage: input.bannerImage,
+      bannerImage: imageUrl ? { url: imageUrl } : undefined,
+      bannerVideo: videoEmbedHtml ? { embedHtml: videoEmbedHtml } : undefined,
       status: input.status,
       slug,
       content,
@@ -103,8 +106,19 @@ export const StoryService = {
 
     if (input.content) {
       const cleanContent = sanitizeHtml(input.content);
+      const imageUrl = firstImageUrl(cleanContent);
+      const videoEmbedHtml = firstVideoEmbedHtml(cleanContent);
       updates.content = cleanContent;
       updates.readingTime = calculateReadingTime(cleanContent);
+      // Left unset (rather than cleared) when the content no longer has an
+      // image/video — Mongo drops `undefined` values, so a stale banner from
+      // removed media can briefly linger until the next edit adds new media.
+      if (imageUrl) {
+        updates.bannerImage = { url: imageUrl };
+      }
+      if (videoEmbedHtml) {
+        updates.bannerVideo = { embedHtml: videoEmbedHtml };
+      }
     }
 
     if (input.status === "published" && existing.status !== "published") {

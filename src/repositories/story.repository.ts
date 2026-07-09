@@ -5,7 +5,7 @@ import type { IStory, LeanStory, LeanStorySummary } from "@/interfaces/story.int
 
 // Excludes `content` — list/card views never need the full HTML body.
 const SUMMARY_PROJECTION =
-  "title slug excerpt bannerImage status publishedAt readingTime createdAt updatedAt";
+  "title slug bannerImage bannerVideo status publishedAt readingTime createdAt updatedAt";
 
 export interface ListStoriesParams {
   filter: QueryFilter<IStory>;

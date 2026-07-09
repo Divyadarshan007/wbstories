@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(rm -f /tmp/test-filter.ts)"
+      "Bash(rm -f /tmp/test-filter.ts)",
+      "Bash(curl -s http://localhost:3000/ -o /dev/null -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:3001/ -o /dev/null -w \"%{http_code}\\\\n\")"
     ],
     "additionalDirectories": [
       "\\tmp"

@@ -1,8 +1,9 @@
 "use client";
 
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import { ClassicEditor } from "ckeditor5";
+import { BalloonEditor } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
+import "./ckeditor-medium-theme.css";
 import { CKEDITOR_PLUGINS, CKEDITOR_BASE_CONFIG } from "@/lib/ckeditor.config";
 import { CloudinaryUploadAdapterPlugin } from "@/lib/ckeditor-upload-adapter";
 
@@ -15,9 +16,9 @@ interface CKEditorFieldProps {
 // CKEditor touches the DOM at instantiation and cannot be server-rendered.
 export default function CKEditorField({ initialData = "", onChange }: CKEditorFieldProps) {
   return (
-    <div className="rounded-md border">
+    <div>
       <CKEditor
-        editor={ClassicEditor}
+        editor={BalloonEditor}
         data={initialData}
         config={{
           ...CKEDITOR_BASE_CONFIG,

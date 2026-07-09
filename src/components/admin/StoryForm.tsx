@@ -8,9 +8,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -19,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BannerImageUploader } from "@/components/admin/BannerImageUploader";
 import { createStorySchema, type CreateStoryInput } from "@/validations/story.validation";
 
 const CKEditorField = dynamic(() => import("@/components/admin/CKEditorField"), {
@@ -35,8 +31,6 @@ interface StoryFormProps {
 
 const EMPTY_DEFAULTS: CreateStoryInput = {
   title: "",
-  excerpt: "",
-  bannerImage: { url: "", publicId: "" },
   content: "",
   status: "draft",
 };
@@ -50,15 +44,11 @@ export function StoryForm({ mode, storyId, defaultValues }: StoryFormProps) {
     register,
     handleSubmit,
     control,
-    watch,
-    setValue,
     formState: { errors },
   } = useForm<z.input<typeof createStorySchema>, unknown, z.output<typeof createStorySchema>>({
     resolver: zodResolver(createStorySchema),
     defaultValues: defaultValues ?? EMPTY_DEFAULTS,
   });
-
-  const bannerImage = watch("bannerImage");
 
   // `status` has a zod .default(), so react-hook-form tracks it as optional
   // while being edited but the resolver guarantees it's filled in by the
@@ -91,79 +81,14 @@ export function StoryForm({ mode, storyId, defaultValues }: StoryFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          {...register("title")}
-          placeholder="Story title"
-          aria-invalid={!!errors.title}
-          aria-describedby={errors.title ? "title-error" : undefined}
-        />
-        {errors.title && (
-          <p id="title-error" className="text-sm text-destructive">
-            {errors.title.message}
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label id="banner-image-label">Banner image</Label>
-        <BannerImageUploader
-          value={bannerImage?.url ? bannerImage : null}
-          onChange={(image) =>
-            setValue("bannerImage", image ?? { url: "", publicId: "" }, { shouldValidate: true })
-          }
-        />
-        {errors.bannerImage?.url && (
-          <p id="banner-image-error" className="text-sm text-destructive" role="alert">
-            Banner image is required
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="excerpt">Excerpt</Label>
-        <Textarea
-          id="excerpt"
-          {...register("excerpt")}
-          placeholder="Short summary shown on story cards"
-          rows={3}
-          aria-invalid={!!errors.excerpt}
-          aria-describedby={errors.excerpt ? "excerpt-error" : undefined}
-        />
-        {errors.excerpt && (
-          <p id="excerpt-error" className="text-sm text-destructive">
-            {errors.excerpt.message}
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label id="content-label">Content</Label>
-        <Controller
-          name="content"
-          control={control}
-          render={({ field }) => (
-            <CKEditorField initialData={initialContent} onChange={field.onChange} />
-          )}
-        />
-        {errors.content && (
-          <p id="content-error" className="text-sm text-destructive" role="alert">
-            {errors.content.message}
-          </p>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        <Label>Status</Label>
+    <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-3xl">
+      <div className="flex items-center justify-between border-b pb-4">
         <Controller
           name="status"
           control={control}
           render={({ field }) => (
             <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-36">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -173,15 +98,47 @@ export function StoryForm({ mode, storyId, defaultValues }: StoryFormProps) {
             </Select>
           )}
         />
+        <div className="flex gap-3">
+          <Button type="button" variant="outline" onClick={() => router.push("/admin/stories")}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : mode === "create" ? "Publish" : "Save changes"}
+          </Button>
+        </div>
       </div>
 
-      <div className="flex gap-3">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : mode === "create" ? "Create story" : "Save changes"}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push("/admin/stories")}>
-          Cancel
-        </Button>
+      {/* Left padding gives CKEditor's block "+" button room to sit inside
+          the canvas — it renders just outside the editable's own left edge,
+          so with no padding here it would hang off in the page margin. */}
+      <div className="mt-8 px-10">
+        <input
+          {...register("title")}
+          placeholder="Title"
+          aria-invalid={!!errors.title}
+          aria-describedby={errors.title ? "title-error" : undefined}
+          className="w-full border-none bg-transparent text-4xl font-bold tracking-tight outline-none placeholder:text-muted-foreground/50"
+        />
+        {errors.title && (
+          <p id="title-error" className="mt-2 text-sm text-destructive">
+            {errors.title.message}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-4 px-10">
+        <Controller
+          name="content"
+          control={control}
+          render={({ field }) => (
+            <CKEditorField initialData={initialContent} onChange={field.onChange} />
+          )}
+        />
+        {errors.content && (
+          <p className="mt-2 text-sm text-destructive" role="alert">
+            {errors.content.message}
+          </p>
+        )}
       </div>
     </form>
   );

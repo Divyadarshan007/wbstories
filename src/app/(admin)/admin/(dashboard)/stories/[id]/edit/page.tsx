@@ -25,8 +25,6 @@ export default async function EditStoryPage({ params }: EditStoryPageProps) {
 
   const defaultValues: CreateStoryInput = {
     title: story.title,
-    excerpt: story.excerpt,
-    bannerImage: story.bannerImage,
     content: story.content,
     status: story.status,
   };

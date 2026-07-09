@@ -1,11 +1,11 @@
-import type { IBannerImage, StoryStatus } from "@/interfaces/story.interface";
+import type { IBannerImage, IBannerVideo, StoryStatus } from "@/interfaces/story.interface";
 
 export interface StoryDTO {
   id: string;
   title: string;
   slug: string;
-  excerpt: string;
-  bannerImage: IBannerImage;
+  bannerImage?: IBannerImage;
+  bannerVideo?: IBannerVideo;
   content: string;
   status: StoryStatus;
   publishedAt: string | null;
@@ -20,7 +20,7 @@ export type StorySummaryDTO = Omit<StoryDTO, "content">;
 export interface AdjacentStoryDTO {
   title: string;
   slug: string;
-  bannerImage: IBannerImage;
+  bannerImage?: IBannerImage;
   publishedAt: string | null;
   readingTime: number;
 }

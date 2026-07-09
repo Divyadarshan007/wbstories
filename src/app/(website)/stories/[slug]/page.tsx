@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { Calendar, Clock } from "lucide-react";
 import { StoryService } from "@/services/story.service";
@@ -10,6 +9,7 @@ import { Breadcrumb } from "@/components/shared/Breadcrumb";
 import { JsonLd } from "@/components/shared/JsonLd";
 import { formatDate } from "@/helpers/date.helper";
 import { buildMetadata } from "@/helpers/metadata.helper";
+import { htmlToPlainText, truncateText } from "@/helpers/text.helper";
 import { siteConfig } from "@/config/site.config";
 
 interface StoryPageProps {
@@ -26,9 +26,9 @@ export async function generateMetadata({ params }: StoryPageProps): Promise<Meta
 
   return buildMetadata({
     title: story.title,
-    description: story.excerpt,
+    description: truncateText(htmlToPlainText(story.content), 155),
     path: `/stories/${story.slug}`,
-    image: story.bannerImage.url,
+    image: story.bannerImage?.url,
     type: "article",
     publishedTime: story.publishedAt ?? undefined,
     modifiedTime: story.updatedAt,
@@ -49,6 +49,7 @@ export default async function StoryPage({ params }: StoryPageProps) {
   ]);
 
   const storyUrl = `${siteConfig.url}/stories/${story.slug}`;
+  const description = truncateText(htmlToPlainText(story.content), 155);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
@@ -57,8 +58,8 @@ export default async function StoryPage({ params }: StoryPageProps) {
           "@context": "https://schema.org",
           "@type": "Article",
           headline: story.title,
-          description: story.excerpt,
-          image: [story.bannerImage.url],
+          description,
+          image: story.bannerImage ? [story.bannerImage.url] : undefined,
           datePublished: story.publishedAt,
           dateModified: story.updatedAt,
           author: { "@type": "Organization", name: siteConfig.name },
@@ -88,17 +89,6 @@ export default async function StoryPage({ params }: StoryPageProps) {
               <Clock className="size-4" />
               {story.readingTime} min read
             </span>
-          </div>
-
-          <div className="relative mt-8 aspect-video overflow-hidden rounded-lg bg-muted">
-            <Image
-              src={story.bannerImage.url}
-              alt={story.title}
-              fill
-              sizes="(min-width: 1024px) 768px, 100vw"
-              className="object-cover"
-              priority
-            />
           </div>
 
           <div className="mt-8">

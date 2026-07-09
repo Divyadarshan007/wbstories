@@ -4,15 +4,19 @@ export type StoryStatus = "draft" | "published";
 
 export interface IBannerImage {
   url: string;
-  publicId: string;
+  publicId?: string;
+}
+
+export interface IBannerVideo {
+  embedHtml: string;
 }
 
 export interface IStory extends Document {
   _id: Types.ObjectId;
   title: string;
   slug: string;
-  excerpt: string;
-  bannerImage: IBannerImage;
+  bannerImage?: IBannerImage;
+  bannerVideo?: IBannerVideo;
   content: string;
   status: StoryStatus;
   publishedAt: Date | null;

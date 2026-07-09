@@ -15,14 +15,26 @@ const StorySchema = new Schema<IStory>(
       unique: true,
       trim: true,
     },
-    excerpt: {
-      type: String,
-      required: true,
-      maxlength: 500,
-    },
     bannerImage: {
-      url: { type: String, required: true },
-      publicId: { type: String, required: true },
+      type: new Schema(
+        {
+          url: { type: String, required: true },
+          publicId: { type: String },
+        },
+        { _id: false },
+      ),
+      required: false,
+      default: undefined,
+    },
+    bannerVideo: {
+      type: new Schema(
+        {
+          embedHtml: { type: String, required: true },
+        },
+        { _id: false },
+      ),
+      required: false,
+      default: undefined,
     },
     content: {
       type: String,
@@ -53,10 +65,7 @@ const StorySchema = new Schema<IStory>(
 // `slug` already gets a unique index from the field option above.
 StorySchema.index({ status: 1, publishedAt: -1 });
 StorySchema.index({ isDeleted: 1 });
-StorySchema.index(
-  { title: "text", excerpt: "text" },
-  { weights: { title: 5, excerpt: 1 }, name: "story_text_search" },
-);
+StorySchema.index({ title: "text" }, { name: "story_text_search" });
 
 export const StoryModel =
   (mongoose.models.Story as mongoose.Model<IStory>) ??

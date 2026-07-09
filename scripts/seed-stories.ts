@@ -3,11 +3,11 @@ import { StoryModel } from "../src/models/story.model";
 import { slugify } from "../src/utils/slugify.util";
 import { sanitizeHtml } from "../src/services/sanitize.service";
 import { calculateReadingTime } from "../src/services/reading-time.service";
+import { firstImageUrl } from "../src/helpers/text.helper";
 
 interface SeedStory {
   title: string;
-  excerpt: string;
-  bannerImage: { url: string; publicId: string };
+  imageUrl: string;
   content: string;
   status: "draft" | "published";
   daysAgo: number;
@@ -15,14 +15,14 @@ interface SeedStory {
 
 // Cloudinary's public "demo" cloud sample images — real, always-available
 // URLs that need no credentials, so these render even before real
-// CLOUDINARY_* values are configured.
+// CLOUDINARY_* values are configured. Embedded as the first image in each
+// story's content, matching how the editor now derives the banner image.
 const SAMPLE_STORIES: SeedStory[] = [
   {
     title: "How a Small Bakery Scaled to Ten Cities in Two Years",
-    excerpt:
-      "A look at the operational playbook behind one of the fastest-growing bakery chains in the region.",
-    bannerImage: { url: "https://res.cloudinary.com/demo/image/upload/sample.jpg", publicId: "demo/sample" },
+    imageUrl: "https://res.cloudinary.com/demo/image/upload/sample.jpg",
     content: `
+      <img src="https://res.cloudinary.com/demo/image/upload/sample.jpg" alt="Bakery" />
       <p>When Maria Chen opened her first bakery in a converted garage, she never imagined it would become a ten-city operation within two years.</p>
       <h2>Starting Small</h2>
       <p>The first location ran on a single oven and a handful of recipes passed down through three generations.</p>
@@ -40,10 +40,9 @@ const SAMPLE_STORIES: SeedStory[] = [
   },
   {
     title: "The Rise of Remote-First Manufacturing Teams",
-    excerpt:
-      "Manufacturing was supposed to be the one industry remote work could never touch. These companies are proving otherwise.",
-    bannerImage: { url: "https://res.cloudinary.com/demo/image/upload/landscape.jpg", publicId: "demo/landscape" },
+    imageUrl: "https://res.cloudinary.com/demo/image/upload/landscape.jpg",
     content: `
+      <img src="https://res.cloudinary.com/demo/image/upload/landscape.jpg" alt="Manufacturing" />
       <p>Remote work reshaped software, marketing, and finance. Manufacturing was thought to be immune — until it wasn't.</p>
       <h2>Remote Oversight, Local Execution</h2>
       <p>Modern IoT sensors and camera systems now let plant managers oversee production lines from anywhere in the world.</p>
@@ -60,10 +59,9 @@ const SAMPLE_STORIES: SeedStory[] = [
   },
   {
     title: "Inside the Acquisition That Reshaped a Local Logistics Market",
-    excerpt:
-      "A regional logistics company's acquisition of its biggest competitor changed the delivery landscape overnight.",
-    bannerImage: { url: "https://res.cloudinary.com/demo/image/upload/bike.jpg", publicId: "demo/bike" },
+    imageUrl: "https://res.cloudinary.com/demo/image/upload/bike.jpg",
     content: `
+      <img src="https://res.cloudinary.com/demo/image/upload/bike.jpg" alt="Logistics" />
       <p>When Northline Logistics announced its acquisition of rival Fenwick Freight, few expected regulators to approve it so quickly.</p>
       <h2>Why the Deal Made Sense</h2>
       <p>Both companies shared overlapping routes but complementary strengths — Northline's warehousing network paired well with Fenwick's last-mile fleet.</p>
@@ -81,10 +79,9 @@ const SAMPLE_STORIES: SeedStory[] = [
   },
   {
     title: "Why This Fintech Startup Walked Away From a $40M Term Sheet",
-    excerpt:
-      "Turning down a nine-figure valuation sounds irrational — unless you understand what the founders were protecting.",
-    bannerImage: { url: "https://res.cloudinary.com/demo/image/upload/couple.jpg", publicId: "demo/couple" },
+    imageUrl: "https://res.cloudinary.com/demo/image/upload/couple.jpg",
     content: `
+      <img src="https://res.cloudinary.com/demo/image/upload/couple.jpg" alt="Founders" />
       <p>Most founders dream of a term sheet like the one Larkspur Finance turned down last spring.</p>
       <h2>The Fine Print</h2>
       <p>Buried in the offer were governance terms that would have handed control of product decisions to the lead investor.</p>
@@ -96,9 +93,9 @@ const SAMPLE_STORIES: SeedStory[] = [
   },
   {
     title: "A Family Hardware Store's Fourth-Generation Pivot to E-Commerce",
-    excerpt: "Ninety years after opening its doors, this hardware store finally went digital — and it's paying off.",
-    bannerImage: { url: "https://res.cloudinary.com/demo/image/upload/sample.jpg", publicId: "demo/sample" },
+    imageUrl: "https://res.cloudinary.com/demo/image/upload/sample.jpg",
     content: `
+      <img src="https://res.cloudinary.com/demo/image/upload/sample.jpg" alt="Hardware store" />
       <p>Founded in 1934, Bishop Hardware had survived depressions, recessions, and three big-box competitors moving in nearby.</p>
       <h2>Digital, Finally</h2>
       <p>It took a pandemic to push the fourth-generation owners to finally build an online storefront.</p>
@@ -114,10 +111,9 @@ const SAMPLE_STORIES: SeedStory[] = [
   },
   {
     title: "Draft: Exploring a Merger With Our Regional Competitor",
-    excerpt:
-      "An early look at a potential merger that could reshape the regional market — still under internal review.",
-    bannerImage: { url: "https://res.cloudinary.com/demo/image/upload/landscape.jpg", publicId: "demo/landscape" },
+    imageUrl: "https://res.cloudinary.com/demo/image/upload/landscape.jpg",
     content: `
+      <img src="https://res.cloudinary.com/demo/image/upload/landscape.jpg" alt="Merger" />
       <p>This is a draft story used to demonstrate the admin panel's draft/published workflow.</p>
       <p>It should only be visible in the admin story list, not on the public site.</p>
     `,
@@ -155,12 +151,12 @@ async function main() {
       sample.status === "published"
         ? new Date(Date.now() - sample.daysAgo * 24 * 60 * 60 * 1000)
         : null;
+    const imageUrl = firstImageUrl(content);
 
     await StoryModel.create({
       title: sample.title,
       slug,
-      excerpt: sample.excerpt,
-      bannerImage: sample.bannerImage,
+      bannerImage: imageUrl ? { url: imageUrl } : undefined,
       content,
       status: sample.status,
       publishedAt,

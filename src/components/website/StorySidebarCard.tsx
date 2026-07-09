@@ -6,7 +6,7 @@ import type { IBannerImage } from "@/interfaces/story.interface";
 interface StorySidebarCardProps {
   slug: string;
   title: string;
-  bannerImage: IBannerImage;
+  bannerImage?: IBannerImage;
   publishedAt: string | null;
   readingTime: number;
 }
@@ -21,13 +21,15 @@ export function StorySidebarCard({
   return (
     <Link href={`/stories/${slug}`} className="group flex gap-3">
       <div className="relative aspect-video w-28 shrink-0 overflow-hidden rounded-md bg-muted">
-        <Image
-          src={bannerImage.url}
-          alt={title}
-          fill
-          sizes="112px"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        {bannerImage && (
+          <Image
+            src={bannerImage.url}
+            alt={title}
+            fill
+            sizes="112px"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        )}
       </div>
       <div className="flex min-w-0 flex-col gap-1">
         <h3 className="line-clamp-2 text-sm leading-snug font-medium group-hover:underline">
