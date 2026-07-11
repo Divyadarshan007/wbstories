@@ -1,7 +1,24 @@
-/* Restyles CKEditor's BlockToolbar to look like Medium's floating
-   "+" insert menu: a circular gutter trigger plus a row of circular
-   green-outlined icon buttons. Scoped to .ck-block-toolbar-button and
-   .ck-toolbar-container so the text-selection balloon toolbar is untouched. */
+/* Restyles CKEditor's BalloonToolbar (text-selection popup: Bold, Italic,
+   Underline, Strikethrough, Heading dropdown, Link, BlockQuote) and
+   BlockToolbar (the "+" gutter insert menu) to look like Medium's circular
+   green-outlined icon buttons.
+
+   Both toolbars share CKEditor's generic "ck-toolbar-container" balloon
+   class, and the heading dropdown's option list (.ck-dropdown__panel) is
+   nested *inside* the same .ck-toolbar element as the other buttons. So the
+   circular-button rule below is deliberately scoped to
+   ".ck-toolbar__items > .ck-button" (direct children only) rather than a
+   deep ".ck-toolbar .ck-button" descendant selector - that excludes the
+   heading dropdown's internal toggle button and its option list, which are
+   styled separately further down and must keep their text labels intact. */
+
+:root {
+  --ck-color-button-on-background: #1a8917;
+  --ck-color-button-on-hover-background: #147312;
+  --ck-color-button-on-active-background: #147312;
+  --ck-color-button-on-color: #fff;
+  --ck-color-focus-border: #1a8917;
+}
 
 .ck.ck-block-toolbar-button {
   width: 32px;
@@ -36,7 +53,7 @@
   gap: 10px;
 }
 
-.ck.ck-toolbar-container .ck-toolbar .ck-button {
+.ck.ck-toolbar-container .ck-toolbar__items > .ck-button {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -45,15 +62,45 @@
   color: #1a8917;
 }
 
-.ck.ck-toolbar-container .ck-toolbar .ck-button:hover,
-.ck.ck-toolbar-container .ck-toolbar .ck-button:focus {
+.ck.ck-toolbar-container .ck-toolbar__items > .ck-button:hover,
+.ck.ck-toolbar-container .ck-toolbar__items > .ck-button:focus {
   background: #1a8917;
   color: #fff;
 }
 
-.ck.ck-toolbar-container .ck-toolbar .ck-button .ck-icon {
+.ck.ck-toolbar-container .ck-toolbar__items > .ck-button.ck-on {
+  background: #1a8917;
+  border-color: #1a8917;
+  color: #fff;
+}
+
+.ck.ck-toolbar-container .ck-toolbar__items > .ck-button .ck-icon {
   width: 16px;
   height: 16px;
+}
+
+/* The heading dropdown ("Paragraph" / "Heading 1" / "Heading 2" / "Heading
+   3") is a .ck-dropdown, not a plain .ck-button, so it's untouched by the
+   circular rule above. Style it as a green-outlined pill instead so it
+   matches the rest of the balloon toolbar while keeping its text label and
+   the stock per-level font-size preview (ck-heading_heading1/2/3) intact. */
+
+.ck.ck-toolbar-container .ck-toolbar__items > .ck-dropdown .ck-dropdown__button {
+  height: 36px;
+  border-radius: 18px;
+  border: 1px solid #1a8917;
+  background: #fff;
+  color: #1a8917;
+}
+
+.ck.ck-toolbar-container .ck-toolbar__items > .ck-dropdown .ck-dropdown__button:hover,
+.ck.ck-toolbar-container .ck-toolbar__items > .ck-dropdown .ck-dropdown__button:focus {
+  background: #1a8917;
+  color: #fff;
+}
+
+.ck.ck-toolbar-container .ck-toolbar__items > .ck-dropdown .ck-dropdown__arrow {
+  color: inherit;
 }
 
 /* Editing-view widget for the bookmark card produced by pasting a non-media
