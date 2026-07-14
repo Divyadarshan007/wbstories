@@ -19,6 +19,11 @@ export const siteConfig = {
     name: "Zaploom Technologies",
     url: "https://zaploom.in/",
   },
+  socials: {
+    linkedin: "https://linkedin.com/company/zaploom/",
+    instagram: "https://www.instagram.com/zaploomtechnologies",
+    whatsapp: "https://wa.me/918200923860",
+  },
   nav: [
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
